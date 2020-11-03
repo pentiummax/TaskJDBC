@@ -9,7 +9,12 @@ import java.util.List;
 
 public class UserServiceImpl implements UserService {
 
-    private final UserDao userDao = new UserDaoHibernateImpl();
+    private final UserDao userDao = UserDaoHibernateImpl.getInstance();
+    private static UserService userService;
+
+    private UserServiceImpl() {
+
+    }
 
     public void createUsersTable() {
         userDao.createUsersTable();
@@ -33,5 +38,12 @@ public class UserServiceImpl implements UserService {
 
     public void cleanUsersTable() {
         userDao.cleanUsersTable();
+    }
+
+    public static UserService getInstance() {
+        if (userService == null) {
+            userService = new UserServiceImpl();
+        }
+        return userService;
     }
 }

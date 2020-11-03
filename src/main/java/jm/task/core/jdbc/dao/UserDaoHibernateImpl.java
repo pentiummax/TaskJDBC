@@ -3,6 +3,7 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import javax.persistence.TypedQuery;
@@ -11,13 +12,16 @@ import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
 
-    public UserDaoHibernateImpl() {
+    private static UserDao userDao;
+    private final SessionFactory sessionFactory;
 
+    private UserDaoHibernateImpl() {
+        sessionFactory = Util.getSessionFactory();
     }
 
     @Override
     public void createUsersTable() {
-        Session session = Util.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         final Transaction transaction = session.getTransaction();
         transaction.begin();
         try {
@@ -37,7 +41,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void dropUsersTable() {
-        Session session = Util.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         final Transaction transaction = session.getTransaction();
         transaction.begin();
         try {
@@ -54,7 +58,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        Session session = Util.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         final Transaction transaction = session.getTransaction();
         transaction.begin();
         try {
@@ -70,7 +74,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void removeUserById(long id) {
-        Session session = Util.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         final Transaction transaction = session.getTransaction();
         transaction.begin();
         try {
@@ -87,7 +91,7 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     @SuppressWarnings("unchecked")
     public List<User> getAllUsers() {
-        try (Session session = Util.getSessionFactory().openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             TypedQuery<User> query = session.createQuery("from User");
             return query.getResultList();
         } catch (Exception e) {
@@ -98,7 +102,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void cleanUsersTable() {
-        Session session = Util.getSessionFactory().openSession();
+        Session session = sessionFactory.openSession();
         final Transaction transaction = session.getTransaction();
         transaction.begin();
         try {
@@ -111,5 +115,12 @@ public class UserDaoHibernateImpl implements UserDao {
         } finally {
             session.close();
         }
+    }
+
+    public static UserDao getInstance() {
+        if (userDao == null) {
+            userDao = new UserDaoHibernateImpl();
+        }
+        return userDao;
     }
 }
