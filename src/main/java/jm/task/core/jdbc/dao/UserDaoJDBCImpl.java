@@ -14,17 +14,14 @@ import java.util.List;
 public class UserDaoJDBCImpl implements UserDao {
 
     private Connection connection;
+    private static UserDao userDao;
 
-    {
+    private UserDaoJDBCImpl() {
         try {
             connection = Util.getConnection();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public UserDaoJDBCImpl() {
-
     }
 
     public void createUsersTable() {
@@ -118,7 +115,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
-        try (Statement statement = connection.createStatement();) {
+        try (Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery("SELECT * FROM Users");
             while (resultSet.next()) {
                 long id = resultSet.getLong("id");
@@ -153,5 +150,12 @@ public class UserDaoJDBCImpl implements UserDao {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static UserDao getInstance() {
+        if (userDao == null) {
+            userDao = new UserDaoJDBCImpl();
+        }
+        return userDao;
     }
 }
